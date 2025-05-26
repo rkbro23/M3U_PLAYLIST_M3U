@@ -120,150 +120,96 @@
   // Channels array: each subarray = different servers for 1 channel
   // Put URLs as you want, iframe/html URLs or .m3u8 direct streams
   const channels = [
-    ["https://amitb3669.github.io/allinonereborn/str_sports_hindi.html", "https://watch.dtvxtream.com/lunar-ipl-hindi", "https://momixtvmpdplayer.pages.dev/?play=https://ottb.live.cf.ww.aiv-cdn.net/lhr-nitro/live/clients/dash/enc/qoumyhlpal/out/v1/3cd34e92a4e64d239c73eaad0637b094/cenc.mpd&kid=2306a99f3da0dd901a5e5ab547c1a7d1&key=6c1c0c2b7d29b6ab1bfaa62e0fc30728"],
-    ["https://allinonereborn.com/spicetv-web/player.html?url=https%3A%2F%2Fallinonereborn.com%2Ftest.m3u8%3Fid%3D65088&name=WILLOW%20HD", "https://amssandbrix.b-cdn.net/LiveApp/streams/NKAv2V2BTnEuVJdS170390248731.m3u8"],
-    ["https://allinonereborn.com/spicetv-web/player.html?url=https%3A%2F%2Fallinonereborn.com%2Ftest.m3u8%3Fid%3D44598&name=MLB%20NETWORK%20HD", "https://watch.dtvxtream.com/lunar-ipl-eng"]
-  ];
+  ["https://amitb3669.github.io/allinonereborn/str_sports_hindi.html", "https://watch.dtvxtream.com/lunar-ipl-hindi", "https://momixtvmpdplayer.pages.dev/?play=https://ottb.live.cf.ww.aiv-cdn.net/lhr-nitro/live/clients/dash/enc/qoumyhlpal/out/v1/3cd34e92a4e64d239c73eaad0637b094/cenc.mpd&kid=2306a99f3da0dd901a5e5ab547c1a7d1&key=6c1c0c2b7d29b6ab1bfaa62e0fc30728"],
+  ["https://allinonereborn.com/spicetv-web/player.html?url=https%3A%2F%2Fallinonereborn.com%2Ftest.m3u8%3Fid%3D65088&name=WILLOW%20HD", "https://amssandbrix.b-cdn.net/LiveApp/streams/NKAv2V2BTnEuVJdS170390248731.m3u8"],
+  ["https://allinonereborn.com/spicetv-web/player.html?url=https%3A%2F%2Fallinonereborn.com%2Ftest.m3u8%3Fid%3D44598&name=MLB%20NETWORK%20HD", "https://watch.dtvxtream.com/lunar-ipl-eng"]
+];
+let currentChannel = 0;
+let isRecording = false;
+let startTime = null;
 
-  let currentChannelIndex = 0;
-  let currentServerIndex = 0;
-  let isRecording = false;
-  let recordStartTime = null;
+function toggleServers() {
+  const list = document.getElementById("serverList");
+  list.style.display = list.style.display === "block" ? "none" : "block";
+}
 
-  const playerBox = document.getElementById("playerBox");
-  const volumeControl = document.getElementById("volumeControl");
-  const recordBtn = document.getElementById("recordBtn");
-  const channelList = document.getElementById("channelList");
+function toggleQualities() {
+  const list = document.getElementById("qualityList");
+  list.style.display = list.style.display === "block" ? "none" : "block";
+}
 
-  // Initialize volume value
-  volumeControl.value = 0.7;
+function loadChannel(index) {
+  currentChannel = index;
+  showServers(index);
+  loadStream(channels[index][0]);
+}
 
-  // Create channel buttons dynamically
-  function createChannelButtons() {
-    channelList.innerHTML = "";
-    channels.forEach((servers, chIndex) => {
-      const btn = document.createElement("button");
-      btn.classList.add("channelBtn");
-      btn.innerText = `Channel ${chIndex + 1}`;
-      btn.title = servers[0];
-      btn.onclick = () => loadChannel(chIndex);
-      channelList.appendChild(btn);
-    });
-    setActiveChannelButton(currentChannelIndex);
-  }
-
-  // Highlight active channel button
-  function setActiveChannelButton(index) {
-    const buttons = document.querySelectorAll(".channelBtn");
-    buttons.forEach((btn, i) => {
-      btn.classList.toggle("active", i === index);
-    });
-  }
-
-  // Load channel by index, default server 0
-  function loadChannel(index) {
-    currentChannelIndex = index;
-    currentServerIndex = 0;
-    setActiveChannelButton(index);
-    loadStream(channels[index][0]);
-  }
-
-  // Load stream URL: decide iframe or video player
-  function loadStream(url) {
-    // Clear previous player
-    playerBox.innerHTML = "";
-
-    if (!url) {
-      playerBox.innerText = "No stream URL available.";
-      return;
-    }
-
-    // Determine if URL is iframe/html page or direct stream (.m3u8, .mp4 etc)
-    const isIframe = url.includes(".html") || url.includes("player?") || url.includes("iframe") || url.includes("http") && url.match(/\.html?|player\?|iframe/);
-
-    if (isIframe) {
-      // iframe player
-      const iframe = document.createElement("iframe");
-      iframe.src = url;
-      iframe.allowFullscreen = true;
-      iframe.style.border = "none";
-      iframe.style.width = "100%";
-      iframe.style.height = "100%";
-      iframe.style.borderRadius = "12px";
-      playerBox.appendChild(iframe);
-    } else {
-      // video player for .m3u8 or direct streams
-      const video = document.createElement("video");
-      video.controls = true;
-      video.autoplay = true;
-      video.id = "mainPlayer";
-      video.style.width = "100%";
-      video.style.height = "100%";
-      video.style.borderRadius = "12px";
-
-      const source = document.createElement("source");
-      source.src = url;
-      source.type = "application/x-mpegURL";
-
-      video.appendChild(source);
-      playerBox.appendChild(video);
-
-      // Sync volume slider and video volume
-      video.volume = volumeControl.value;
-
-      // Listen for volume slider changes
-      volumeControl.oninput = () => {
-        video.volume = volumeControl.value;
-      };
-    }
-  }
-
-  // Recording button logic (fake demo)
-  recordBtn.onclick = () => {
-    if (!isRecording) {
-      isRecording = true;
-      recordBtn.innerText = "Stop Recording";
-      recordStartTime = new Date();
-      alert("Recording started (demo only, not real)");
-    } else {
-      isRecording = false;
-      recordBtn.innerText = "Start Recording";
-      const duration = ((new Date()) - recordStartTime) / 1000;
-      // Create fake blob file to download
-      const blob = new Blob([`Fake recording of duration ${duration.toFixed(1)} seconds.`], {type: "video/mp4"});
-      const a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
-      a.download = `recording_${Date.now()}.mp4`;
-      a.click();
-      alert("Recording stopped and file downloaded (demo)");
-    }
-  };
-
-  // Keyboard shortcuts
-  document.addEventListener("keydown", (e) => {
-    const video = document.getElementById("mainPlayer");
-    if (!video) return;
-
-    switch(e.code) {
-      case "Space":
-        e.preventDefault();
-        if (video.paused) video.play(); else video.pause();
-        break;
-      case "ArrowRight":
-        video.currentTime += 10;
-        break;
-      case "ArrowLeft":
-        video.currentTime -= 10;
-        break;
-    }
+function showServers(index) {
+  const list = document.getElementById("serverList");
+  list.innerHTML = "";
+  channels[index].forEach((url, i) => {
+    const div = document.createElement("div");
+    div.innerText = url === "no-url" ? "NO OTHER SERVER" : `Server ${i + 1}`;
+    div.onclick = () => url !== "no-url" && loadStream(url);
+    list.appendChild(div);
   });
+}
 
-  // On page load
-  window.onload = () => {
-    createChannelButtons();
-    loadChannel(0);
-  };
-</script>
+function loadStream(url) {
+  const playerBox = document.getElementById("playerBox");
+  if (url.includes("iframe") || url.includes(".html") || url.includes("player?") || url.includes("multimovies")) {
+    // iframe player
+    playerBox.innerHTML = `<iframe src="${url}" frameborder="0" allowfullscreen style="width:100%; height:480px; border-radius:12px; border: 2px solid #00ffc3; box-shadow: 0 0 15px #00ffc3;"></iframe>`;
+  } else {
+    // video player for .m3u8 or direct streams
+    playerBox.innerHTML = `<video controls autoplay id="mainPlayer" style="width:100%; height:480px; border-radius:12px; border: 2px solid #00ffc3; box-shadow: 0 0 15px #00ffc3;">
+      <source src="${url}" type="application/x-mpegURL">
+      Your browser does not support the video tag.
+    </video>`;
 
-</body>
-</html>
+    // Attach volume listener once
+    const volumeControl = document.getElementById("volumeControl");
+    const video = document.getElementById("mainPlayer");
+    if (volumeControl && video) {
+      volumeControl.oninput = function () {
+        video.volume = this.value;
+      };
+      video.volume = volumeControl.value; // initial volume sync
+    }
+  }
+}
+
+function toggleRecording(btn) {
+  if (!isRecording) {
+    isRecording = true;
+    startTime = new Date();
+    btn.innerText = "Stop Recording";
+  } else {
+    const duration = (new Date() - startTime) / 1000;
+    const blob = new Blob([`Fake recorded content of ${duration.toFixed(0)}s`], { type: "video/mp4" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `recording_${Date.now()}.mp4`;
+    a.click();
+    isRecording = false;
+    btn.innerText = "Start Recording";
+  }
+}
+
+function enterPiP() {
+  const video = document.getElementById("mainPlayer");
+  if (video && document.pictureInPictureEnabled && !video.disablePictureInPicture) {
+    video.requestPictureInPicture().catch(console.error);
+  }
+}
+
+document.addEventListener("keydown", function(e) {
+  const video = document.getElementById("mainPlayer");
+  if (!video) return;
+  if (e.code === "Space") video.paused ? video.play() : video.pause();
+  if (e.code === "ArrowRight") video.currentTime += 10;
+  if (e.code === "ArrowLeft") video.currentTime -= 10;
+});
+
+// Initial load
+loadChannel(0);
