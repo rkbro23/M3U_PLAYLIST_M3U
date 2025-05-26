@@ -1,273 +1,269 @@
-<!-- Full optimized code, modified as requested -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>RK Live Sports Streaming</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet"/>
-  <style>
-    * { box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-    body {
-      margin: 0;
-      padding: 20px 10px;
-      background: linear-gradient(to right, #000, #1a1a1a);
-      color: white;
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Auto M3U8 & Iframe Player</title>
+<style>
+  body {
+    background: #000;
+    color: #0ff;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0; padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+  }
+  h1 {
+    margin-top: 15px;
+    font-weight: 700;
+    text-shadow: 0 0 8px #00ffc3;
+  }
+  #playerBox {
+    width: 100%;
+    max-width: 900px;
+    height: 480px;
+    margin: 20px auto;
+    border-radius: 12px;
+    border: 2px solid #00ffc3;
+    box-shadow: 0 0 15px #00ffc3;
+    background: #111;
+    overflow: hidden;
+  }
+  iframe, video {
+    width: 100%;
+    height: 100%;
+    border-radius: 12px;
+    background: black;
+  }
+  #controls {
+    max-width: 900px;
+    width: 100%;
+    margin: 10px auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    padding: 0 10px;
+  }
+  #volumeControl {
+    flex-grow: 1;
+    max-width: 200px;
+  }
+  button {
+    background: #00ffc3;
+    border: none;
+    color: #000;
+    font-weight: 600;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
+  button:hover {
+    background: #00b38a;
+    color: #fff;
+  }
+  #channelList {
+    max-width: 900px;
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    padding: 10px;
+  }
+  .channelBtn {
+    background: #005f4d;
+    border: 2px solid #00ffc3;
+    border-radius: 8px;
+    color: #0ff;
+    font-weight: 600;
+    padding: 8px 16px;
+    cursor: pointer;
+    flex: 1 1 140px;
+    text-align: center;
+    user-select: none;
+    transition: background 0.3s ease, color 0.3s ease;
+  }
+  .channelBtn:hover, .channelBtn.active {
+    background: #00ffc3;
+    color: #000;
+  }
+  @media (max-width: 600px) {
+    #playerBox {
+      height: 260px;
     }
-    header {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 15px;
-      margin-bottom: 10px;
-    }
-    header img { height: 50px; border-radius: 12px; }
-    header h1 {
-      color: #00ffc3;
-      font-size: 1.6rem;
-      font-weight: 600;
-      text-shadow: 0 0 10px #00ffc3;
-    }
-    .video-container {
-      position: relative;
-      width: 100%;
-      max-width: 800px;
-      margin: auto;
-    }
-    iframe, video {
-      width: 100%;
-      height: 480px;
-      border-radius: 12px;
-      border: 2px solid #00ffc3;
-      box-shadow: 0 0 15px #00ffc3;
-    }
-    .server-selector, .record-btn, .quality-btn, .pip-btn, .volume-slider {
-      position: absolute;
-      background: #00ffc3;
-      color: #000;
-      font-weight: bold;
-      border: none;
-      padding: 6px 12px;
-      border-radius: 6px;
-      cursor: pointer;
-      z-index: 10;
-    }
-    .server-selector { top: 10px; right: 10px; }
-    .record-btn { top: 10px; left: 10px; }
-    .quality-btn { bottom: 10px; right: 10px; }
-    .pip-btn { bottom: 10px; left: 10px; }
-    .volume-slider {
-      bottom: 10px;
-      left: 50%;
-      transform: translateX(-50%);
-      height: 30px;
-    }
-    .channel-name {
-      position: absolute;
-      top: 10px;
-      right: 110px;
-      background: #00ffc3;
-      color: #000;
-      font-weight: bold;
-      padding: 5px 10px;
-      border-radius: 6px;
-    }
-    .server-list, .quality-list {
-      display: none;
-      position: absolute;
-      background: #111;
-      border: 1px solid #00ffc3;
-      border-radius: 8px;
-      z-index: 99;
-    }
-    .server-list div, .quality-list div {
-      padding: 8px 15px;
-      cursor: pointer;
-      color: #00ffc3;
-    }
-    .server-list div:hover, .quality-list div:hover { background: #00ffc3; color: #000; }
-    .channel-bar {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-      gap: 20px;
-      margin-top: 30px;
-      justify-items: center;
-    }
-    .channel-bar div {
-      cursor: pointer;
-      text-align: center;
-    }
-    .channel-bar img {
-      height: 60px;
-      border-radius: 6px;
-    }
-    .channel-bar span {
-      margin-top: 5px;
-      color: #00ffc3;
-      font-weight: bold;
-      display: block;
-    }
-    #popup {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0,0,0,0.8);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 9999;
-    }
-    #popup-content {
-      background: #111;
-      border: 2px solid #00ffc3;
-      padding: 20px;
-      border-radius: 10px;
-      text-align: center;
-    }
-    #popup-content h2 {
-      color: #00ffc3;
-      margin-bottom: 15px;
-    }
-    #popup-content button {
-      background: #00ffc3;
-      border: none;
-      padding: 8px 16px;
-      margin: 5px;
-      font-weight: bold;
-      cursor: pointer;
-      border-radius: 6px;
-    }
-  </style>
+  }
+</style>
 </head>
 <body>
-  <div id="popup">
-    <div id="popup-content">
-      <h2>Join Our Telegram Channel</h2>
-      <p>Get latest updates and stream links</p>
-      <button onclick="window.location.href='https://t.me/IPTVM3Y'">OK</button>
-      <button onclick="document.getElementById('popup').style.display='none'">Cancel</button>
-    </div>
-  </div>
 
-  <header>
-    <img src="https://i.ibb.co/vvYBf9K0/images.png" alt="Logo">
-    <h1>M3U PLAYLIST</h1>
-  </header>
+<h1>M3U8 & Iframe Auto Player</h1>
 
-  <div class="video-container">
-    <div class="channel-name" id="channelName">Star Sports 2 HD</div>
-    <button class="server-selector" onclick="toggleServers()">Servers</button>
-    <button class="record-btn" onclick="toggleRecording(this)">Start Recording</button>
-    <button class="quality-btn" onclick="toggleQualities()">Quality</button>
-    <button class="pip-btn" onclick="enterPiP()">PiP</button>
-    <input type="range" class="volume-slider" id="volumeControl" min="0" max="1" step="0.05" value="1">
-    <div class="server-list" id="serverList"></div>
-    <div class="quality-list" id="qualityList" style="bottom: 40px; right: 10px;">
-      <div>1080p</div><div>720p</div><div>480p</div><div>360p</div>
-    </div>
-    <div id="playerBox">
-      <video controls autoplay id="mainPlayer">
-        <source src="https://amit-1.allinonereborn.in/jiotv414/app/ts_live_1984.m3u8" type="application/x-mpegURL">
-      </video>
-    </div>
-  </div>
+<div id="playerBox">
+  <!-- Video or iframe player will be loaded here -->
+</div>
 
-  <div class="channel-bar">
-    <div onclick="loadChannel(0, 'Star Sports 2 HD')">
-      <img src="https://i.ibb.co/1f875JTr/images.jpg" alt="Star Sports 2 HD">
-      <span>Star Sports 2 HD</span>
-    </div>
-    <div onclick="loadChannel(1, 'Willow ENG')">
-      <img src="https://i.ibb.co/MyQb6bbj/images-1.png" alt="Willow ENG">
-      <span>Willow ENG</span>
-    </div>
-    <div onclick="loadChannel(2, 'MLB Baseball')">
-      <img src="https://i.ibb.co/99sM2W8R/images-2.png" alt="MLB">
-      <span>MLB Baseball</span>
-    </div>
-  </div>
+<div id="controls">
+  <label for="volumeControl">Volume</label>
+  <input type="range" id="volumeControl" min="0" max="1" step="0.01" value="0.7" />
+  <button id="recordBtn">Start Recording</button>
+</div>
 
-  <script>
-    const channels = [
-      ["https://amitb3669.github.io/allinonereborn/str_sports_hindi.html", "https://watch.dtvxtream.com/lunar-ipl-hindi", "https://amit-1.allinonereborn.in/jiotv414/app/ts_live_1998.m3u8"],
-      ["https://allinonereborn.com/spicetv-web/player.html?url=https%3A%2F%2Fallinonereborn.com%2Ftest.m3u8%3Fid%3D65088&name=WILLOW%20HD", "https://momixtvprimeweb.pages.dev/player?id=amzn1.dv.gti.26076eae-98c2-4548-8575-85a8b302bedc&source=Akamai5"],
-      ["https://allinonereborn.com/spicetv-web/player.html?url=https%3A%2F%2Fallinonereborn.com%2Ftest.m3u8%3Fid%3D44598&name=MLB%20NETWORK%20HD", "https://allinonereborn.com/op141.m3u8?id=167583"]
-    ];
-    let currentChannel = 0;
-    let isRecording = false;
-    let startTime = null;
+<div id="channelList">
+  <!-- Channel buttons auto generated here -->
+</div>
 
-    function toggleServers() {
-      const list = document.getElementById("serverList");
-      list.style.display = list.style.display === "block" ? "none" : "block";
-    }
+<script>
+  // Channels array: each subarray = different servers for 1 channel
+  // Put URLs as you want, iframe/html URLs or .m3u8 direct streams
+  const channels = [
+    ["https://amitb3669.github.io/allinonereborn/str_sports_hindi.html", "https://watch.dtvxtream.com/lunar-ipl-hindi", "https://momixtvmpdplayer.pages.dev/?play=https://ottb.live.cf.ww.aiv-cdn.net/lhr-nitro/live/clients/dash/enc/qoumyhlpal/out/v1/3cd34e92a4e64d239c73eaad0637b094/cenc.mpd&kid=2306a99f3da0dd901a5e5ab547c1a7d1&key=6c1c0c2b7d29b6ab1bfaa62e0fc30728"],
+    ["https://allinonereborn.com/spicetv-web/player.html?url=https%3A%2F%2Fallinonereborn.com%2Ftest.m3u8%3Fid%3D65088&name=WILLOW%20HD", "https://amssandbrix.b-cdn.net/LiveApp/streams/NKAv2V2BTnEuVJdS170390248731.m3u8"],
+    ["https://allinonereborn.com/spicetv-web/player.html?url=https%3A%2F%2Fallinonereborn.com%2Ftest.m3u8%3Fid%3D44598&name=MLB%20NETWORK%20HD", "https://watch.dtvxtream.com/lunar-ipl-eng"]
+  ];
 
-    function toggleQualities() {
-      const list = document.getElementById("qualityList");
-      list.style.display = list.style.display === "block" ? "none" : "block";
-    }
+  let currentChannelIndex = 0;
+  let currentServerIndex = 0;
+  let isRecording = false;
+  let recordStartTime = null;
 
-    function loadChannel(index, name) {
-      currentChannel = index;
-      document.getElementById("channelName").innerText = name;
-      showServers(index);
-      loadStream(channels[index][0]);
-    }
+  const playerBox = document.getElementById("playerBox");
+  const volumeControl = document.getElementById("volumeControl");
+  const recordBtn = document.getElementById("recordBtn");
+  const channelList = document.getElementById("channelList");
 
-    function showServers(index) {
-      const list = document.getElementById("serverList");
-      list.innerHTML = "";
-      channels[index].forEach((url, i) => {
-        const div = document.createElement("div");
-        div.innerText = `Server ${i + 1}`;
-        div.onclick = () => loadStream(url);
-        list.appendChild(div);
-      });
-    }
+  // Initialize volume value
+  volumeControl.value = 0.7;
 
-    function loadStream(url) {
-      const playerBox = document.getElementById("playerBox");
-      if (url.includes("iframe") || url.includes(".html") || url.includes("player?") || url.includes("multimovies")) {
-        playerBox.innerHTML = `<iframe src="${url}" frameborder="0" allowfullscreen></iframe>`;
-      } else {
-        playerBox.innerHTML = `<video controls autoplay id="mainPlayer"><source src="${url}" type="application/x-mpegURL"></video>`;
-        document.getElementById("mainPlayer").volume = document.getElementById("volumeControl").value;
-      }
-    }
-
-    function toggleRecording(btn) {
-      if (!isRecording) {
-        isRecording = true;
-        startTime = new Date();
-        btn.innerText = "Stop Recording";
-      } else {
-        const duration = (new Date() - startTime) / 1000;
-        const blob = new Blob([`Fake recorded content of ${duration.toFixed(0)}s`], { type: "video/mp4" });
-        const a = document.createElement("a");
-        a.href = URL.createObjectURL(blob);
-        a.download = `recording_${Date.now()}.mp4`;
-        a.click();
-        isRecording = false;
-        btn.innerText = "Start Recording";
-      }
-    }
-
-    function enterPiP() {
-      const video = document.getElementById("mainPlayer");
-      if (video && document.pictureInPictureEnabled && !video.disablePictureInPicture) {
-        video.requestPictureInPicture().catch(console.error);
-      }
-    }
-
-    document.addEventListener("keydown", function(e) {
-      const video = document.getElementById("mainPlayer");
-      if (!video) return;
-      if (e.code === "Space") video.paused ? video.play() : video.pause();
-      if (e.code === "ArrowRight") video.currentTime += 10;
-      if (e.code === "ArrowLeft") video.currentTime -= 10;
+  // Create channel buttons dynamically
+  function createChannelButtons() {
+    channelList.innerHTML = "";
+    channels.forEach((servers, chIndex) => {
+      const btn = document.createElement("button");
+      btn.classList.add("channelBtn");
+      btn.innerText = `Channel ${chIndex + 1}`;
+      btn.title = servers[0];
+      btn.onclick = () => loadChannel(chIndex);
+      channelList.appendChild(btn);
     });
+    setActiveChannelButton(currentChannelIndex);
+  }
 
-    loadChannel(0, 'Star Sports 2 HD');
-  </script>
+  // Highlight active channel button
+  function setActiveChannelButton(index) {
+    const buttons = document.querySelectorAll(".channelBtn");
+    buttons.forEach((btn, i) => {
+      btn.classList.toggle("active", i === index);
+    });
+  }
+
+  // Load channel by index, default server 0
+  function loadChannel(index) {
+    currentChannelIndex = index;
+    currentServerIndex = 0;
+    setActiveChannelButton(index);
+    loadStream(channels[index][0]);
+  }
+
+  // Load stream URL: decide iframe or video player
+  function loadStream(url) {
+    // Clear previous player
+    playerBox.innerHTML = "";
+
+    if (!url) {
+      playerBox.innerText = "No stream URL available.";
+      return;
+    }
+
+    // Determine if URL is iframe/html page or direct stream (.m3u8, .mp4 etc)
+    const isIframe = url.includes(".html") || url.includes("player?") || url.includes("iframe") || url.includes("http") && url.match(/\.html?|player\?|iframe/);
+
+    if (isIframe) {
+      // iframe player
+      const iframe = document.createElement("iframe");
+      iframe.src = url;
+      iframe.allowFullscreen = true;
+      iframe.style.border = "none";
+      iframe.style.width = "100%";
+      iframe.style.height = "100%";
+      iframe.style.borderRadius = "12px";
+      playerBox.appendChild(iframe);
+    } else {
+      // video player for .m3u8 or direct streams
+      const video = document.createElement("video");
+      video.controls = true;
+      video.autoplay = true;
+      video.id = "mainPlayer";
+      video.style.width = "100%";
+      video.style.height = "100%";
+      video.style.borderRadius = "12px";
+
+      const source = document.createElement("source");
+      source.src = url;
+      source.type = "application/x-mpegURL";
+
+      video.appendChild(source);
+      playerBox.appendChild(video);
+
+      // Sync volume slider and video volume
+      video.volume = volumeControl.value;
+
+      // Listen for volume slider changes
+      volumeControl.oninput = () => {
+        video.volume = volumeControl.value;
+      };
+    }
+  }
+
+  // Recording button logic (fake demo)
+  recordBtn.onclick = () => {
+    if (!isRecording) {
+      isRecording = true;
+      recordBtn.innerText = "Stop Recording";
+      recordStartTime = new Date();
+      alert("Recording started (demo only, not real)");
+    } else {
+      isRecording = false;
+      recordBtn.innerText = "Start Recording";
+      const duration = ((new Date()) - recordStartTime) / 1000;
+      // Create fake blob file to download
+      const blob = new Blob([`Fake recording of duration ${duration.toFixed(1)} seconds.`], {type: "video/mp4"});
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = `recording_${Date.now()}.mp4`;
+      a.click();
+      alert("Recording stopped and file downloaded (demo)");
+    }
+  };
+
+  // Keyboard shortcuts
+  document.addEventListener("keydown", (e) => {
+    const video = document.getElementById("mainPlayer");
+    if (!video) return;
+
+    switch(e.code) {
+      case "Space":
+        e.preventDefault();
+        if (video.paused) video.play(); else video.pause();
+        break;
+      case "ArrowRight":
+        video.currentTime += 10;
+        break;
+      case "ArrowLeft":
+        video.currentTime -= 10;
+        break;
+    }
+  });
+
+  // On page load
+  window.onload = () => {
+    createChannelButtons();
+    loadChannel(0);
+  };
+</script>
+
 </body>
 </html>
