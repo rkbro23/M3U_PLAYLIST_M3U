@@ -1,215 +1,228 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>RK SPORTS STREAMING WEB</title>
-<style>
-  body {
-    background: #000;
-    color: #0ff;
-    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-    margin: 0; padding: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    min-height: 100vh;
-  }
-  h1 {
-    margin-top: 15px;
-    font-weight: 700;
-    text-shadow: 0 0 8px #00ffc3;
-  }
-  #playerBox {
-    width: 100%;
-    max-width: 900px;
-    height: 480px;
-    margin: 20px auto;
-    border-radius: 12px;
-    border: 2px solid #00ffc3;
-    box-shadow: 0 0 15px #00ffc3;
-    background: #111;
-    overflow: hidden;
-  }
-  iframe, video {
-    width: 100%;
-    height: 100%;
-    border-radius: 12px;
-    background: black;
-  }
-  #controls {
-    max-width: 900px;
-    width: 100%;
-    margin: 10px auto;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 15px;
-    padding: 0 10px;
-  }
-  #volumeControl {
-    flex-grow: 1;
-    max-width: 200px;
-  }
-  button {
-    background: #00ffc3;
-    border: none;
-    color: #000;
-    font-weight: 600;
-    padding: 8px 16px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background 0.3s ease;
-  }
-  button:hover {
-    background: #00b38a;
-    color: #fff;
-  }
-  #channelList {
-    max-width: 900px;
-    width: 100%;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 10px;
-    padding: 10px;
-  }
-  .channelBtn {
-    background: #005f4d;
-    border: 2px solid #00ffc3;
-    border-radius: 8px;
-    color: #0ff;
-    font-weight: 600;
-    padding: 8px 16px;
-    cursor: pointer;
-    flex: 1 1 140px;
-    text-align: center;
-    user-select: none;
-    transition: background 0.3s ease, color 0.3s ease;
-  }
-  .channelBtn:hover, .channelBtn.active {
-    background: #00ffc3;
-    color: #000;
-  }
-  @media (max-width: 600px) {
-    #playerBox {
-      height: 260px;
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ultimate IPTV Player</title>
+  <script type="module" src="https://cdn.jsdelivr.net/npm/hls-video-element/+esm"></script>
+  <script type="module" src="https://cdn.jsdelivr.net/npm/player.style/yt/+esm"></script>
+  <style>
+    :root {
+      --bg: #0f0f0f;
+      --text: #fff;
+      --primary: #1db954;
+      --accent: #00ffe7;
     }
-  }
-</style>
+    [data-theme='light'] {
+      --bg: #ffffff;
+      --text: #000000;
+      --primary: #007bff;
+      --accent: #00bcd4;
+    }body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  transition: all 0.3s ease;
+}
+
+h1 {
+  background: linear-gradient(to right, var(--accent), var(--primary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-size: 2rem;
+  margin-bottom: 20px;
+  animation: fadeInDown 1s ease-in-out;
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+input, select, button, label {
+  padding: 10px;
+  border-radius: 10px;
+  border: none;
+  font-size: 1rem;
+  background: #1b1b1b;
+  color: var(--accent);
+  outline: none;
+  transition: all 0.3s;
+}
+
+input[type="file"] {
+  color: white;
+}
+
+button {
+  cursor: pointer;
+  background: var(--primary);
+  color: white;
+}
+
+button:hover {
+  background: var(--accent);
+  color: #000;
+}
+
+media-theme-yt, video {
+  width: 100%;
+  max-width: 900px;
+  aspect-ratio: 16 / 9;
+  border-radius: 12px;
+  box-shadow: 0 0 20px rgba(0, 255, 231, 0.4);
+  margin-top: 10px;
+}
+
+#playlist {
+  margin-top: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 10px;
+  border-radius: 12px;
+  max-height: 300px;
+  overflow-y: auto;
+  display: none;
+}
+
+#playlist button {
+  background: #222;
+  margin: 5px;
+  display: block;
+  width: 100%;
+  text-align: left;
+}
+
+#popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+#popupContent {
+  background: var(--bg);
+  color: var(--text);
+  padding: 20px;
+  border-radius: 12px;
+  text-align: center;
+}
+#popup button {
+  margin-top: 10px;
+}
+
+@keyframes fadeInDown {
+  0% { transform: translateY(-20px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+  </style>
 </head>
 <body>
+  <h1>🚀 IPTV Player with Playlist & Format Support</h1>  <div class="controls">
+    <input type="text" id="streamUrl" placeholder="Enter Stream URL (.m3u8, .mp4...)" />
+    <input type="text" id="playlistUrl" placeholder="Or enter Playlist URL (.m3u)" />
+    <input type="file" id="playlistFile" accept=".m3u,.txt" />
+    <button onclick="loadStream()">▶ Play</button>
+    <button onclick="togglePlaylist()">📃 Show Playlist</button>
+    <button onclick="toggleTheme()">🌓 Toggle Theme</button>
+    <button onclick="enterPip()">📺 PiP Mode</button>
+  </div>  <media-theme-yt id="mediaWrapper">
+    <hls-video id="hlsPlayer" slot="media" controls crossorigin="anonymous" playsinline></hls-video>
+  </media-theme-yt>
+  <video id="fallbackPlayer" controls style="display:none;"></video>  <div id="playlist"></div>  <div id="popup">
+    <div id="popupContent">
+      <p>Join our Telegram channel for updates & premium links!</p>
+      <button onclick="window.open('https://t.me/IPTVM3Y','_blank')">Join Now</button>
+      <button onclick="document.getElementById('popup').style.display='none'">Cancel</button>
+    </div>
+  </div>  <script>
+    const hlsPlayer = document.getElementById("hlsPlayer");
+    const fallbackPlayer = document.getElementById("fallbackPlayer");
+    const streamInput = document.getElementById("streamUrl");
+    const playlistInput = document.getElementById("playlistUrl");
+    const playlistDiv = document.getElementById("playlist");
+    const fileInput = document.getElementById("playlistFile");
 
-<h1>M3U8 & Iframe Auto Player</h1>
-
-<div id="playerBox">
-  <!-- Video or iframe player will be loaded here -->
-</div>
-
-<div id="controls">
-  <label for="volumeControl">Volume</label>
-  <input type="range" id="volumeControl" min="0" max="1" step="0.01" value="0.7" />
-  <button id="recordBtn">Start Recording</button>
-</div>
-
-<div id="channelList">
-  <!-- Channel buttons auto generated here -->
-</div>
-
-<script>
-  // Channels array: each subarray = different servers for 1 channel
-  // Put URLs as you want, iframe/html URLs or .m3u8 direct streams
-  const channels = [
-  ["https://amitb3669.github.io/allinonereborn/str_sports_hindi.html", "https://watch.dtvxtream.com/lunar-ipl-hindi", "https://momixtvmpdplayer.pages.dev/?play=https://ottb.live.cf.ww.aiv-cdn.net/lhr-nitro/live/clients/dash/enc/qoumyhlpal/out/v1/3cd34e92a4e64d239c73eaad0637b094/cenc.mpd&kid=2306a99f3da0dd901a5e5ab547c1a7d1&key=6c1c0c2b7d29b6ab1bfaa62e0fc30728"],
-  ["https://allinonereborn.com/spicetv-web/player.html?url=https%3A%2F%2Fallinonereborn.com%2Ftest.m3u8%3Fid%3D65088&name=WILLOW%20HD", "https://amssandbrix.b-cdn.net/LiveApp/streams/NKAv2V2BTnEuVJdS170390248731.m3u8"],
-  ["https://allinonereborn.com/spicetv-web/player.html?url=https%3A%2F%2Fallinonereborn.com%2Ftest.m3u8%3Fid%3D44598&name=MLB%20NETWORK%20HD", "https://watch.dtvxtream.com/lunar-ipl-eng"]
-];
-let currentChannel = 0;
-let isRecording = false;
-let startTime = null;
-
-function toggleServers() {
-  const list = document.getElementById("serverList");
-  list.style.display = list.style.display === "block" ? "none" : "block";
-}
-
-function toggleQualities() {
-  const list = document.getElementById("qualityList");
-  list.style.display = list.style.display === "block" ? "none" : "block";
-}
-
-function loadChannel(index) {
-  currentChannel = index;
-  showServers(index);
-  loadStream(channels[index][0]);
-}
-
-function showServers(index) {
-  const list = document.getElementById("serverList");
-  list.innerHTML = "";
-  channels[index].forEach((url, i) => {
-    const div = document.createElement("div");
-    div.innerText = url === "no-url" ? "NO OTHER SERVER" : `Server ${i + 1}`;
-    div.onclick = () => url !== "no-url" && loadStream(url);
-    list.appendChild(div);
-  });
-}
-
-function loadStream(url) {
-  const playerBox = document.getElementById("playerBox");
-  if (url.includes("iframe") || url.includes(".html") || url.includes("player?") || url.includes("multimovies")) {
-    // iframe player
-    playerBox.innerHTML = `<iframe src="${url}" frameborder="0" allowfullscreen style="width:100%; height:480px; border-radius:12px; border: 2px solid #00ffc3; box-shadow: 0 0 15px #00ffc3;"></iframe>`;
-  } else {
-    // video player for .m3u8 or direct streams
-    playerBox.innerHTML = `<video controls autoplay id="mainPlayer" style="width:100%; height:480px; border-radius:12px; border: 2px solid #00ffc3; box-shadow: 0 0 15px #00ffc3;">
-      <source src="${url}" type="application/x-mpegURL">
-      Your browser does not support the video tag.
-    </video>`;
-
-    // Attach volume listener once
-    const volumeControl = document.getElementById("volumeControl");
-    const video = document.getElementById("mainPlayer");
-    if (volumeControl && video) {
-      volumeControl.oninput = function () {
-        video.volume = this.value;
-      };
-      video.volume = volumeControl.value; // initial volume sync
+    function loadStream(url = null) {
+      const streamUrl = url || streamInput.value.trim();
+      if (!streamUrl) return alert("Enter a valid stream URL");
+      if (streamUrl.endsWith(".m3u8")) {
+        fallbackPlayer.style.display = "none";
+        hlsPlayer.style.display = "block";
+        hlsPlayer.src = streamUrl;
+      } else {
+        hlsPlayer.style.display = "none";
+        fallbackPlayer.style.display = "block";
+        fallbackPlayer.src = streamUrl;
+        fallbackPlayer.play();
+      }
     }
-  }
-}
 
-function toggleRecording(btn) {
-  if (!isRecording) {
-    isRecording = true;
-    startTime = new Date();
-    btn.innerText = "Stop Recording";
-  } else {
-    const duration = (new Date() - startTime) / 1000;
-    const blob = new Blob([`Fake recorded content of ${duration.toFixed(0)}s`], { type: "video/mp4" });
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = `recording_${Date.now()}.mp4`;
-    a.click();
-    isRecording = false;
-    btn.innerText = "Start Recording";
-  }
-}
+    function togglePlaylist() {
+      playlistDiv.style.display = playlistDiv.style.display === "none" ? "block" : "none";
+    }
 
-function enterPiP() {
-  const video = document.getElementById("mainPlayer");
-  if (video && document.pictureInPictureEnabled && !video.disablePictureInPicture) {
-    video.requestPictureInPicture().catch(console.error);
-  }
-}
+    fileInput.addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const lines = event.target.result.split(/\r?\n/).filter(l => l && !l.startsWith("#"));
+        populatePlaylist(lines);
+      };
+      reader.readAsText(file);
+    });
 
-document.addEventListener("keydown", function(e) {
-  const video = document.getElementById("mainPlayer");
-  if (!video) return;
-  if (e.code === "Space") video.paused ? video.play() : video.pause();
-  if (e.code === "ArrowRight") video.currentTime += 10;
-  if (e.code === "ArrowLeft") video.currentTime -= 10;
-});
+    playlistInput.addEventListener("change", () => {
+      const url = playlistInput.value.trim();
+      if (!url) return;
+      fetch(url)
+        .then(res => res.text())
+        .then(text => {
+          const lines = text.split(/\r?\n/).filter(l => l && !l.startsWith("#"));
+          populatePlaylist(lines);
+        })
+        .catch(() => alert("Failed to load playlist URL"));
+    });
 
-// Initial load
-loadChannel(0);
+    function populatePlaylist(lines) {
+      playlistDiv.innerHTML = "";
+      lines.forEach((line, i) => {
+        const btn = document.createElement("button");
+        btn.textContent = `Channel ${i + 1}`;
+        btn.onclick = () => loadStream(line);
+        playlistDiv.appendChild(btn);
+      });
+    }
+
+    function toggleTheme() {
+      const html = document.documentElement;
+      html.dataset.theme = html.dataset.theme === 'light' ? 'dark' : 'light';
+    }
+
+    function enterPip() {
+      const player = hlsPlayer.style.display !== 'none' ? hlsPlayer : fallbackPlayer;
+      if (player.requestPictureInPicture) {
+        player.requestPictureInPicture();
+      } else {
+        alert("Your browser doesn't support PiP");
+      }
+    }
+
+    window.onload = () => {
+      document.documentElement.dataset.theme = 'dark';
+    };
+  </script></body>
+</html>
